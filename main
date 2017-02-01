@@ -1,0 +1,11 @@
+import pandas as pd
+from nltk.tokenize import word_tokenize
+
+df = pd.read_csv('articles.csv', header=0)
+
+def tokenize_articles(df):
+    df['title'] = df['title'].astype(str)
+    df['tokenized_title'] = df.apply(lambda row: word_tokenize(row['title']), axis=1)
+    print(str(df.tokenized_title))
+
+tokenize_articles(df)
