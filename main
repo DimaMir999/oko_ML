@@ -1,6 +1,7 @@
 import pandas as pd
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
+from nltk.stem import SnowballStemmer
 import string
 
 df = pd.read_csv('articles.csv', header=0)
@@ -23,6 +24,15 @@ def tokenize_articles(df):
     stop = set(stopwords.words('russian'))
     df['tokenized_text'] = df.apply(lambda row: [w for w in row['tokenized_text'] if w not in stop], axis=1)
 
+    #stemming
+    stemmer = SnowballStemmer("russian")
+    df['stemmed_text'] = df.apply(lambda row: [stemmer.stem(w) for w in row['tokenized_text']], axis=1)
+    print(df['stemmed_text'].iloc[0])
 
+def stem():
+    my_list = ['Коровы', 'были', 'весельем', 'полны', 'мечтая', 'небесными', 'пойлами', 'молочными', 'ручьями']
+    stemmer = SnowballStemmer("russian")
+    k_list = [stemmer.stem(word) for word in my_list]
+    print(k_list)
 
 tokenize_articles(df)
