@@ -1,11 +1,25 @@
 import pandas as pd
 from nltk.tokenize import word_tokenize
+import string
 
 df = pd.read_csv('articles.csv', header=0)
 
 def tokenize_articles(df):
     df['title'] = df['title'].astype(str)
-    df['tokenized_title'] = df.apply(lambda row: word_tokenize(row['title']), axis=1)
-    print(str(df.tokenized_title))
+    df['text'] = df['text'].astype(str)
+
+    #deleting punctuation symbols
+    punc = string.punctuation[:5] + '—' + string.punctuation[5:]
+
+    df['cleaned_title'] = df['title'].apply(lambda row: (''.join(ch for ch in row if ch not in punc)))
+    df['cleaned_text'] = df['text'].apply(lambda row: (''.join(ch for ch in row if ch not in punc)))
+
+    #apply tokenization
+    df['tokenized_title'] = df.apply(lambda row: word_tokenize(row['cleaned_title']), axis=1)
+    df['tokenized_text'] = df.apply(lambda row: word_tokenize(row['cleaned_text']), axis=1)
+
+    print(str(df.tokenized_text.iloc[0]))
+    print(str(df.tokenized_title.iloc[0]))
+
 
 tokenize_articles(df)
