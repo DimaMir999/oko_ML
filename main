@@ -2,37 +2,30 @@ import pandas as pd
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
+from sklearn.feature_extraction.text import TfidfVectorizer
 import string
 
-df = pd.read_csv('articles.csv', header=0)
+from snowballstemmer import PorterStemmer
 
-def tokenize_articles(df):
-    df['title'] = df['title'].astype(str)
-    df['text'] = df['text'].astype(str)
+df = pd.read_csv('examples.csv', header=0)
 
-    #deleting punctuation symbols
+def get_tokens(x):
     punc = string.punctuation[:5] + '—' + string.punctuation[5:]
-
-    df['cleaned_title'] = df['title'].apply(lambda row: (''.join(ch for ch in row if ch not in punc).lower()))
-    df['cleaned_text'] = df['text'].apply(lambda row: (''.join(ch for ch in row if ch not in punc).lower()))
-
-    #apply tokenization
-    df['tokenized_title'] = df.apply(lambda row: word_tokenize(row['cleaned_title']), axis=1)
-    df['tokenized_text'] = df.apply(lambda row: word_tokenize(row['cleaned_text']), axis=1)
-
-    #remove stopwords
+    x_without_punc = ''.join(s for s in x if s not in punc)
+    x_tokenize = word_tokenize(x_without_punc)
     stop = set(stopwords.words('russian'))
-    df['tokenized_text'] = df.apply(lambda row: [w for w in row['tokenized_text'] if w not in stop], axis=1)
-
-    #stemming
+    x_without_stop = [word for word in x_tokenize if word.lower() not in stop]
     stemmer = SnowballStemmer("russian")
-    df['stemmed_text'] = df.apply(lambda row: [stemmer.stem(w) for w in row['tokenized_text']], axis=1)
-    print(df['stemmed_text'].iloc[0])
+    x_stemm = [stemmer.stem(word) for word in x_without_stop]
+    print(x_stemm)
+    return x_stemm
 
-def stem():
-    my_list = ['Коровы', 'были', 'весельем', 'полны', 'мечтая', 'небесными', 'пойлами', 'молочными', 'ручьями']
-    stemmer = SnowballStemmer("russian")
-    k_list = [stemmer.stem(word) for word in my_list]
-    print(k_list)
+def get_tf_idf():
+    vectorizer = TfidfVectorizer(tokenizer=get_tokens)
+    tdm = vectorizer.fit_transform(df['text'])
+    features = vectorizer.get_feature_names()
+    print(tdm)
+    print(features)
 
-tokenize_articles(df)
+get_tf_idf()
+
